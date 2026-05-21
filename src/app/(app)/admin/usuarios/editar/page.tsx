@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getUserById, updateUser } from "@/lib/store";
 import { roleProfiles, getRoleProfile } from "@/lib/roles";
 import type { User, RoleId } from "@/lib/types";
 
-export default function EditarUsuarioPage() {
-  const params = useParams();
+function EditarUsuarioContent() {
+  const params = useSearchParams();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState("");
@@ -15,10 +15,12 @@ export default function EditarUsuarioPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const u = getUserById(params.id as string);
+    const id = params.get("id");
+    if (!id) { router.replace("/admin/usuarios"); return; }
+    const u = getUserById(id);
     if (!u) { router.replace("/admin/usuarios"); return; }
     setUser(u);
-  }, [params.id, router]);
+  }, [params, router]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,7 +49,7 @@ export default function EditarUsuarioPage() {
     <div className="page">
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "var(--space-8)", maxWidth: 960 }}>
         <div>
-          <a href="/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
+          <a href="/lexsum/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
             ← Volver a usuarios
           </a>
           <h1 className="page-title" style={{ marginBottom: "var(--space-1)" }}>Editar usuario</h1>
@@ -91,7 +93,7 @@ export default function EditarUsuarioPage() {
               </div>
               <div className="card-footer">
                 <div className="form-actions" style={{ borderTop: "none", paddingTop: 0, marginTop: 0 }}>
-                  <a href="/admin/usuarios" className="btn btn-secondary">Cancelar</a>
+                  <a href="/lexsum/admin/usuarios" className="btn btn-secondary">Cancelar</a>
                   <button type="submit" className="btn btn-primary" disabled={saving}>
                     {saving ? "Guardando..." : "Guardar cambios"}
                   </button>
@@ -136,7 +138,7 @@ export default function EditarUsuarioPage() {
                 </span>
               </div>
               <button
-                className={`btn btn-sm w-full ${user.active ? "btn-danger" : "btn-accent"}`}
+                className={`btn btn-sm ${user.active ? "btn-danger" : "btn-accent"}`}
                 style={{ width: "100%", justifyContent: "center" }}
                 onClick={() => {
                   updateUser(user.id, { active: !user.active });
@@ -150,6 +152,14 @@ export default function EditarUsuarioPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EditarUsuarioPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "var(--space-8)", color: "var(--fg-tertiary)" }}>Cargando...</div>}>
+      <EditarUsuarioContent />
+    </Suspense>
   );
 }
 

@@ -117,7 +117,7 @@ export default function UsuariosPage() {
                   </td>
                   <td>
                     <div style={{ display: "flex", gap: "var(--space-2)" }}>
-                      <a href={`/admin/usuarios/${u.id}`} className="btn btn-ghost btn-sm">Editar</a>
+                      <a href={`/admin/usuarios/editar?id=${u.id}`} className="btn btn-ghost btn-sm">Editar</a>
                       <button
                         className={`btn btn-sm ${u.active ? "btn-ghost" : "btn-accent"}`}
                         onClick={() => handleToggleActive(u.id, !u.active)}
