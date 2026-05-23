@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createUser, getUserByEmail } from "@/lib/store";
 import { roleProfiles } from "@/lib/roles";
@@ -41,9 +42,9 @@ export default function NuevoUsuarioPage() {
     <div className="page">
       <div style={{ maxWidth: 560 }}>
         <div style={{ marginBottom: "var(--space-6)" }}>
-          <a href="/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
+          <Link href="/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
             ← Volver a usuarios
-          </a>
+          </Link>
           <h1 className="page-title">Crear usuario</h1>
           <p className="page-subtitle">Complete los datos del nuevo usuario institucional</p>
         </div>
@@ -91,7 +92,7 @@ export default function NuevoUsuarioPage() {
 
             <div className="card-footer">
               <div className="form-actions" style={{ borderTop: "none", paddingTop: 0, marginTop: 0 }}>
-                <a href="/admin/usuarios" className="btn btn-secondary">Cancelar</a>
+                <Link href="/admin/usuarios" className="btn btn-secondary">Cancelar</Link>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
                   {saving ? "Creando..." : "Crear usuario"}
                 </button>

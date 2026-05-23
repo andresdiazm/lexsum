@@ -9,6 +9,7 @@ export type RoleId =
 export interface User {
   id: string;
   name: string;
+  cargo?: string;
   email: string;
   role: RoleId;
   unit: string;
@@ -29,11 +30,22 @@ export interface Sujeto {
   cargo?: string;
 }
 
+export type TematicaSumario =
+  | "LEY_KARIN"
+  | "LICENCIAS_MEDICAS"
+  | "AUSENTISMO"
+  | "OTRO";
+
+export type TipoSumario = "INDIVIDUAL" | "COLECTIVO";
+
 export interface Sumario {
   id: string;
   numero: string;
   resolucionInstructora: string;
   fechaResolucion: string;
+  tematica: TematicaSumario;
+  tematicaOtro?: string;
+  tipo: TipoSumario;
   objeto: string;
   sujetos: Sujeto[];
   fiscalId: string;

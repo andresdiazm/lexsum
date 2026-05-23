@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getSumarios } from "@/lib/store";
 import type { Sumario } from "@/lib/types";
 
@@ -33,9 +34,9 @@ export default function InstruccionPage() {
           <h1 className="page-title">Instrucción de sumarios</h1>
           <p className="page-subtitle">{sumarios.length} sumario{sumarios.length !== 1 ? "s" : ""} registrado{sumarios.length !== 1 ? "s" : ""}</p>
         </div>
-        <a href="/instruccion/nuevo" className="btn btn-primary">
+        <Link href="/instruccion/nuevo" className="btn btn-primary">
           <PlusIcon /> Instruir sumario
-        </a>
+        </Link>
       </div>
 
       <div style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-6)", flexWrap: "wrap" }}>
@@ -68,7 +69,7 @@ export default function InstruccionPage() {
             {search || filterEstado ? "Sin resultados para los filtros aplicados." : "Comience instruyendo el primer sumario."}
           </p>
           {!search && !filterEstado && (
-            <a href="/instruccion/nuevo" className="btn btn-primary">Instruir primer sumario</a>
+            <Link href="/instruccion/nuevo" className="btn btn-primary">Instruir primer sumario</Link>
           )}
         </div>
       ) : (

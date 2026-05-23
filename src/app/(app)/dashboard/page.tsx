@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getSession } from "@/lib/store";
 import { getSumarios } from "@/lib/store";
 import type { Session, Sumario } from "@/lib/types";
@@ -82,7 +83,7 @@ function ModuleLink({ href, title, desc, color, accent }: {
   href: string; title: string; desc: string; color: string; accent: string;
 }) {
   return (
-    <a
+    <Link
       href={href}
       style={{
         display: "flex", gap: "var(--space-4)", alignItems: "flex-start",
@@ -95,6 +96,6 @@ function ModuleLink({ href, title, desc, color, accent }: {
         <p style={{ fontWeight: "var(--fw-semibold)", color: accent, marginBottom: 4, fontSize: "var(--fs-body-sm)" }}>{title}</p>
         <p style={{ fontSize: "var(--fs-body-sm)", color: "var(--fg-secondary)", margin: 0 }}>{desc}</p>
       </div>
-    </a>
+    </Link>
   );
 }

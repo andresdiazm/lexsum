@@ -1,16 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getFiscales, createSumario, getSession, getSumarios } from "@/lib/store";
-import type { Sumario, User, Sujeto } from "@/lib/types";
+import type { Sumario, User, Sujeto, TematicaSumario, TipoSumario } from "@/lib/types";
 
 type Step = 1 | 2 | 3;
+
+const TEMATICA_OPTIONS: { value: TematicaSumario; label: string }[] = [
+  { value: "LEY_KARIN", label: "Ley Karin (acoso / violencia en el trabajo)" },
+  { value: "LICENCIAS_MEDICAS", label: "Licencias médicas" },
+  { value: "AUSENTISMO", label: "Ausentismo laboral" },
+  { value: "OTRO", label: "Otro" },
+];
 
 interface FormData1 {
   numero: string;
   resolucionInstructora: string;
   fechaResolucion: string;
+  tematica: TematicaSumario | "";
+  tematicaOtro: string;
+  tipo: TipoSumario;
   objeto: string;
   archivoNombre: string;
 }
@@ -38,6 +49,9 @@ export default function NuevoSumarioPage() {
     numero: "",
     resolucionInstructora: "",
     fechaResolucion: new Date().toISOString().split("T")[0],
+    tematica: "",
+    tematicaOtro: "",
+    tipo: "INDIVIDUAL",
     objeto: "",
     archivoNombre: "",
   });
@@ -56,11 +70,18 @@ export default function NuevoSumarioPage() {
 
   const sujetosValidos = sujetos.filter((s) => s.nombre.trim() !== "");
 
+  const tematicaLabel = form1.tematica
+    ? (form1.tematica === "OTRO" ? form1.tematicaOtro || "Otro" : TEMATICA_OPTIONS.find(t => t.value === form1.tematica)?.label ?? "")
+    : "";
+
   const previewSumario: Sumario = {
     id: "preview",
     numero: form1.numero,
     resolucionInstructora: form1.resolucionInstructora,
     fechaResolucion: form1.fechaResolucion,
+    tematica: (form1.tematica || "OTRO") as TematicaSumario,
+    tematicaOtro: form1.tematicaOtro || undefined,
+    tipo: form1.tipo,
     objeto: form1.objeto,
     sujetos: sujetosValidos,
     fiscalId: form2.fiscalId,
@@ -89,6 +110,9 @@ export default function NuevoSumarioPage() {
       numero: form1.numero,
       resolucionInstructora: form1.resolucionInstructora,
       fechaResolucion: form1.fechaResolucion,
+      tematica: (form1.tematica || "OTRO") as TematicaSumario,
+      tematicaOtro: form1.tematicaOtro || undefined,
+      tipo: form1.tipo,
       objeto: form1.objeto,
       sujetos: sujetosValidos,
       fiscalId: form2.fiscalId,
@@ -107,12 +131,19 @@ export default function NuevoSumarioPage() {
     setForm2({ ...form2, fiscalId: id, fiscalNombre: f?.name ?? "" });
   }
 
+  const step1Valid =
+    !!form1.resolucionInstructora &&
+    !!form1.objeto &&
+    !!form1.numero &&
+    !!form1.tematica &&
+    (form1.tematica !== "OTRO" || !!form1.tematicaOtro.trim());
+
   return (
     <div className="page">
       <div style={{ maxWidth: 760 }}>
-        <a href="/instruccion" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-4)" }}>
+        <Link href="/instruccion" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-4)" }}>
           ← Volver
-        </a>
+        </Link>
         <h1 className="page-title" style={{ marginBottom: "var(--space-6)" }}>Instruir sumario administrativo</h1>
 
         {/* Wizard steps */}
@@ -157,6 +188,68 @@ export default function NuevoSumarioPage() {
                 </div>
 
                 <div className="field">
+                  <label>Temática del sumario *</label>
+                  <select
+                    className="input"
+                    value={form1.tematica}
+                    onChange={(e) => setForm1({ ...form1, tematica: e.target.value as TematicaSumario | "", tematicaOtro: "" })}
+                    required
+                  >
+                    <option value="">Seleccionar temática...</option>
+                    {TEMATICA_OPTIONS.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {form1.tematica === "OTRO" && (
+                  <div className="field">
+                    <label>Descripción de la temática *</label>
+                    <input
+                      className="input"
+                      placeholder="Describa brevemente la temática del sumario..."
+                      value={form1.tematicaOtro}
+                      onChange={(e) => setForm1({ ...form1, tematicaOtro: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="field">
+                  <label>Tipo de sumario *</label>
+                  <div style={{ display: "flex", gap: "var(--space-6)", paddingTop: 8 }}>
+                    {([
+                      { value: "INDIVIDUAL", label: "Individual", desc: "Afecta a un solo funcionario" },
+                      { value: "COLECTIVO", label: "Colectivo", desc: "Afecta a más de un funcionario" },
+                    ] as const).map(({ value, label, desc }) => (
+                      <label
+                        key={value}
+                        style={{
+                          display: "flex", alignItems: "flex-start", gap: "var(--space-3)",
+                          cursor: "pointer", padding: "var(--space-3) var(--space-4)",
+                          background: form1.tipo === value ? "var(--primary-soft)" : "var(--bg-surface-2)",
+                          border: `1.5px solid ${form1.tipo === value ? "var(--primary)" : "var(--border-default)"}`,
+                          borderRadius: "var(--radius-md)", flex: 1, transition: "all var(--dur-fast)"
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="tipo"
+                          value={value}
+                          checked={form1.tipo === value}
+                          onChange={() => setForm1({ ...form1, tipo: value })}
+                          style={{ accentColor: "var(--primary)", marginTop: 2 }}
+                        />
+                        <div>
+                          <p style={{ margin: 0, fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-body-sm)" }}>{label}</p>
+                          <p style={{ margin: 0, fontSize: "var(--fs-caption)", color: "var(--fg-tertiary)" }}>{desc}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="field">
                   <label>Objeto / Descripción del sumario *</label>
                   <textarea
                     className="input"
@@ -169,7 +262,7 @@ export default function NuevoSumarioPage() {
                 </div>
 
                 <div className="field">
-                  <label>Sujetos investigados (opcional)</label>
+                  <label>Sujetos investigados <span style={{ color: "var(--fg-tertiary)", fontWeight: "var(--fw-normal)" }}>(opcional)</span></label>
                   <p className="field-hint">Agregue las personas a investigar. Puede agregar más de una.</p>
                   <div style={{ display: "grid", gap: "var(--space-3)", marginTop: "var(--space-2)" }}>
                     {sujetos.map((s, i) => (
@@ -217,7 +310,7 @@ export default function NuevoSumarioPage() {
                 </div>
 
                 <div className="field">
-                  <label>Archivo adjunto (resolución instructora)</label>
+                  <label>Archivo adjunto <span style={{ color: "var(--fg-tertiary)", fontWeight: "var(--fw-normal)" }}>(opcional)</span></label>
                   <input
                     type="file"
                     className="input"
@@ -228,17 +321,17 @@ export default function NuevoSumarioPage() {
                       if (f) setForm1({ ...form1, archivoNombre: f.name });
                     }}
                   />
-                  <p className="field-hint">Formatos: PDF, DOCX. Solo se guarda el nombre del archivo en esta fase.</p>
+                  <p className="field-hint">Resolución instructora en PDF o DOCX. Solo se registra el nombre del archivo.</p>
                 </div>
               </div>
             </div>
             <div className="card-footer">
               <div className="form-actions" style={{ borderTop: "none", paddingTop: 0, marginTop: 0 }}>
-                <a href="/instruccion" className="btn btn-secondary">Cancelar</a>
+                <Link href="/instruccion" className="btn btn-secondary">Cancelar</Link>
                 <button
                   className="btn btn-primary"
                   onClick={() => setStep(2)}
-                  disabled={!form1.resolucionInstructora || !form1.objeto || !form1.numero}
+                  disabled={!step1Valid}
                 >
                   Continuar →
                 </button>
@@ -260,24 +353,37 @@ export default function NuevoSumarioPage() {
                     <p style={{ fontWeight: "var(--fw-semibold)", margin: "0 0 4px" }}>No hay fiscales disponibles</p>
                     <p style={{ fontSize: "var(--fs-body-sm)", margin: 0 }}>
                       Debe crear al menos un usuario con rol "Fiscal" antes de instruir un sumario.{" "}
-                      <a href="/admin/usuarios/nuevo">Crear usuario fiscal</a>
+                      <Link href="/admin/usuarios">Crear usuario fiscal →</Link>
                     </p>
                   </div>
                 ) : (
-                  <div className="field">
-                    <label>Fiscal designado *</label>
-                    <select
-                      className="input"
-                      value={form2.fiscalId}
-                      onChange={(e) => handleSelectFiscal(e.target.value)}
-                      required
-                    >
-                      <option value="">Seleccionar fiscal...</option>
-                      {fiscales.map((f) => (
-                        <option key={f.id} value={f.id}>{f.name} — {f.unit || "Sin unidad"}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <>
+                    <div className="field">
+                      <label>Fiscal designado *</label>
+                      <select
+                        className="input"
+                        value={form2.fiscalId}
+                        onChange={(e) => handleSelectFiscal(e.target.value)}
+                        required
+                      >
+                        <option value="">Seleccionar fiscal...</option>
+                        {fiscales.map((f) => (
+                          <option key={f.id} value={f.id}>{f.name}{f.unit ? ` — ${f.unit}` : ""}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {form2.fiscalId && (
+                      <div style={{ padding: "var(--space-3) var(--space-4)", background: "var(--info-bg)", border: "1px solid var(--info-border)", borderRadius: "var(--radius-sm)" }}>
+                        <p style={{ fontSize: "var(--fs-caption)", fontWeight: "var(--fw-semibold)", color: "var(--info-fg)", margin: "0 0 2px" }}>
+                          {fiscales.find(f => f.id === form2.fiscalId)?.name}
+                        </p>
+                        <p style={{ fontSize: "var(--fs-caption)", color: "var(--fg-secondary)", margin: 0 }}>
+                          {fiscales.find(f => f.id === form2.fiscalId)?.cargo || "Sin cargo registrado"} · {fiscales.find(f => f.id === form2.fiscalId)?.unit || "Sin unidad"}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="form-row">
@@ -302,7 +408,7 @@ export default function NuevoSumarioPage() {
                       onChange={(e) => setForm2({ ...form2, plazo: Number(e.target.value) })}
                       required
                     />
-                    <p className="field-hint">El plazo se contabiliza desde la notificación al fiscal.</p>
+                    <p className="field-hint">Desde la notificación al fiscal designado.</p>
                   </div>
                 </div>
               </div>
@@ -419,13 +525,15 @@ export default function NuevoSumarioPage() {
                   <Info label="N° Sumario" value={form1.numero} />
                   <Info label="Resolución instructora" value={form1.resolucionInstructora} />
                   <Info label="Fecha resolución" value={new Date(form1.fechaResolucion).toLocaleDateString("es-CL")} />
+                  <Info label="Temática" value={tematicaLabel} />
+                  <Info label="Tipo" value={form1.tipo === "INDIVIDUAL" ? "Individual" : "Colectivo"} />
                   <Info label="Fiscal designado" value={form2.fiscalNombre} />
                   <Info label="Fecha designación" value={new Date(form2.fechaDesignacion).toLocaleDateString("es-CL")} />
                   <Info label="Plazo" value={`${form2.plazo} días hábiles`} />
                   {form1.archivoNombre && <Info label="Archivo adjunto" value={form1.archivoNombre} />}
                   {sujetosValidos.length > 0 && (
                     <div style={{ gridColumn: "1 / -1" }}>
-                      <p style={{ fontWeight: "var(--fw-semibold)", color: "var(--fg-secondary)", marginBottom: 4 }}>Sujetos investigados</p>
+                      <p style={{ fontWeight: "var(--fw-semibold)", color: "var(--fg-secondary)", marginBottom: 4, fontSize: "var(--fs-caption)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Sujetos investigados</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
                         {sujetosValidos.map((s, i) => (
                           <span key={i} className="badge badge-neutral">{s.nombre}</span>

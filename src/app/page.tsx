@@ -1,11 +1,13 @@
-import Image from "next/image";
 import { LoginForm } from "@/components/login-form";
+
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export default function LandingPage() {
   return (
     <main className="landing-shell">
       <header className="landing-header">
-        <Image src="/logo-lexsum-on-dark.png" alt="LexSum" width={150} height={50} priority style={{ height: "auto" }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${BASE}/logo-lexsum-on-dark.png`} alt="LexSum" style={{ width: 150, height: "auto" }} />
         <span className="landing-badge">v3.0 — Acceso institucional</span>
       </header>
 

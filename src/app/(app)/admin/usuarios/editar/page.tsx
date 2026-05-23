@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getUserById, updateUser } from "@/lib/store";
 import { roleProfiles, getRoleProfile } from "@/lib/roles";
@@ -49,9 +50,9 @@ function EditarUsuarioContent() {
     <div className="page">
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "var(--space-8)", maxWidth: 960 }}>
         <div>
-          <a href="/lexsum/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
+          <Link href="/admin/usuarios" className="btn btn-ghost btn-sm" style={{ marginBottom: "var(--space-3)" }}>
             ← Volver a usuarios
-          </a>
+          </Link>
           <h1 className="page-title" style={{ marginBottom: "var(--space-1)" }}>Editar usuario</h1>
           <p className="page-subtitle" style={{ marginBottom: "var(--space-6)" }}>{user.email}</p>
 
@@ -93,7 +94,7 @@ function EditarUsuarioContent() {
               </div>
               <div className="card-footer">
                 <div className="form-actions" style={{ borderTop: "none", paddingTop: 0, marginTop: 0 }}>
-                  <a href="/lexsum/admin/usuarios" className="btn btn-secondary">Cancelar</a>
+                  <Link href="/admin/usuarios" className="btn btn-secondary">Cancelar</Link>
                   <button type="submit" className="btn btn-primary" disabled={saving}>
                     {saving ? "Guardando..." : "Guardar cambios"}
                   </button>

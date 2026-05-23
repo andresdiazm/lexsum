@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getUsers } from "@/lib/store";
-import { roleProfiles, getRoleLabel } from "@/lib/roles";
+import { roleProfiles } from "@/lib/roles";
 import type { User } from "@/lib/types";
 
 export default function AdminPage() {
@@ -19,9 +20,9 @@ export default function AdminPage() {
           <h1 className="page-title">Panel administrador</h1>
           <p className="page-subtitle">Gestión de usuarios, roles y permisos del sistema</p>
         </div>
-        <a href="/admin/usuarios/nuevo" className="btn btn-primary">
+        <Link href="/admin/usuarios" className="btn btn-primary">
           <PlusIcon /> Crear usuario
-        </a>
+        </Link>
       </div>
 
       <div className="stat-grid" style={{ marginBottom: "var(--space-10)" }}>
@@ -42,7 +43,7 @@ export default function AdminPage() {
       <div className="card" style={{ marginBottom: "var(--space-8)" }}>
         <div className="card-header">
           <h3 style={{ margin: 0 }}>Distribución por roles</h3>
-          <a href="/admin/usuarios" className="btn btn-ghost btn-sm">Ver todos los usuarios →</a>
+          <Link href="/admin/usuarios" className="btn btn-ghost btn-sm">Ver todos los usuarios →</Link>
         </div>
         <div className="card-body">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "var(--space-4)" }}>
